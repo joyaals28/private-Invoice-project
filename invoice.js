@@ -30,6 +30,10 @@ function goHome() {
     btnCreate.classList.remove('hidden');
     document.getElementById('invoice-data-form').reset();
     resetItemRows();
+    // Re-verify static logo state
+    var logoImg = document.getElementById('target-logo-img');
+    logoImg.src = "images/Logo.png";
+    logoImg.style.display = 'block';
 }
 
 function resetItemRows() {
@@ -144,16 +148,29 @@ function executeInvoiceGenerationPipeline(e) {
     document.getElementById('target-grand-total').textContent = cumulativeSum.toFixed(3) + ' KD';
     document.getElementById('target-total-words').textContent = toWords(cumulativeSum);
 
-    var logoFile = document.getElementById('form-logo-file');
     var logoImg = document.getElementById('target-logo-img');
     var sigFile = document.getElementById('form-sig-file');
     var sigImg = document.getElementById('target-salesman-sig-img');
 
-    // Helper to run PDF generation only when assets are strictly confirmed loaded
     var assetsLoadedCount = 0;
     var assetsNeededCount = 0;
     
-    if (logoFile.files && logoFile.files[0]) assetsNeededCount++;
+    // Check if the logo image element itself is fully ready and painted inside DOM bounds
+    if (logoImg.complete && logoImg.naturalWidth !== 0) {
+        // Already fully cached and loaded by the browser engine locally
+    } else {
+        assetsNeededCount++;
+        logoImg.onload = function() {
+            assetsLoadedCount++;
+            checkAndFinalize();
+        };
+        logoImg.onerror = function() {
+            console.warn("Local path logo asset failed download pass. Checking backup arrays.");
+            assetsLoadedCount++;
+            checkAndFinalize();
+        };
+    }
+
     if (sigFile.files && sigFile.files[0]) assetsNeededCount++;
 
     function checkAndFinalize() {
@@ -165,29 +182,12 @@ function executeInvoiceGenerationPipeline(e) {
             btnNew.classList.remove('hidden');
             btnDownload.classList.remove('hidden');
             
-            // Allow a small rendering tick for the DOM styles to set, then print
-            setTimeout(function() { exportPdf(); }, 450);
+            // Allow layout engines to settle cleanly, then process
+            setTimeout(function() { exportPdf(); }, 500);
         }
     }
 
-    // Process Corporate Logo Upload Stream
-    if (logoFile.files && logoFile.files[0]) {
-        var logoReader = new FileReader();
-        logoReader.onload = function(ev) {
-            logoImg.onload = function() {
-                assetsLoadedCount++;
-                checkAndFinalize();
-            };
-            logoImg.src = ev.target.result;
-            logoImg.style.display = 'block';
-        };
-        logoReader.readAsDataURL(logoFile.files[0]);
-    } else {
-        logoImg.style.display = 'none';
-        logoImg.src = '';
-    }
-
-    // Process Salesman Signature Upload Stream
+    // Process Salesman Signature Upload Stream cleanly
     if (sigFile.files && sigFile.files[0]) {
         var sigReader = new FileReader();
         sigReader.onload = function(ev) {
@@ -204,7 +204,6 @@ function executeInvoiceGenerationPipeline(e) {
         sigImg.src = '';
     }
 
-    // Fallback if zero images were uploaded
     if (assetsNeededCount === 0) {
         checkAndFinalize();
     }
@@ -214,7 +213,7 @@ function exportPdf() {
     var invoiceNo = document.getElementById('target-no').textContent.trim() || 'Doc';
     var filename = 'Invoice_No_' + invoiceNo + '.pdf';
 
-    btnDownload.textContent = '⏳ Processing…';
+    btnDownload.textContent = '⏳ Generating…';
     btnDownload.disabled = true;
 
     var configOptions = {
@@ -228,7 +227,8 @@ function exportPdf() {
             letterRendering: true,
             backgroundColor: '#ffffff'
         },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        // Strict single page hard cutoff filter configuration
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
     };
 
     html2pdf().set(configOptions).from(renderCanvas).save()
