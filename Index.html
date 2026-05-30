@@ -228,7 +228,7 @@
             });
         }
 
-        // FULLY REDESIGNED MATHEMATICAL NUMBER TO ENGLISH WORDS TRANSLATION ENGINE
+        // FIXED NUMBER TO ENGLISH WORDS TRANSLATION ENGINE
         function convertNumberToEnglishWords(amount) {
             let num = Math.floor(amount);
             if (num === 0) return "Zero KD";
@@ -244,7 +244,7 @@
                     value %= 100;
                 }
                 if (value >= 20) {
-                    text += tens[Math.floor(value / 20)] + " ";
+                    text += tens[Math.floor(value / 10)] + " ";
                     value %= 10;
                 }
                 if (value > 0) {
@@ -326,7 +326,7 @@
             renderCanvas.classList.remove('hidden');
             closeSystemModal();
 
-            // Native explicit layout engine deployment sequence 
+            // Native explicit layout download trigger sequence
             setTimeout(() => {
                 const invoiceElement = document.getElementById('invoice-render-canvas');
                 const outputName = `Invoice_No_${document.getElementById('target-no').textContent || 'Document'}.pdf`;
@@ -339,7 +339,7 @@
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
-                // Triggers immediate background generation stream down to the browser disk download pipe
+                // Triggers immediate file download link interaction on safety stream
                 html2pdf().set(configurationSettings).from(invoiceElement).save();
             }, 500);
         }
