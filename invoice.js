@@ -12,7 +12,13 @@ var btnDownload       = document.getElementById('btn-download');
 var btnCreate         = document.getElementById('btn-create');
 
 /* ── Set today's date as default ── */
-document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
+(function setToday() {
+    var d = new Date();
+    var yyyy = d.getFullYear();
+    var mm   = String(d.getMonth() + 1).padStart(2, '0');
+    var dd   = String(d.getDate()).padStart(2, '0');
+    document.getElementById('form-date').value = yyyy + '-' + mm + '-' + dd;
+})();
 
 /* ════════════════════════════════
    MODAL
@@ -31,7 +37,13 @@ function goHome() {
     btnCreate.classList.remove('hidden');
 
     document.getElementById('invoice-data-form').reset();
-    document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
+    (function setToday() {
+        var d = new Date();
+        var yyyy = d.getFullYear();
+        var mm   = String(d.getMonth() + 1).padStart(2, '0');
+        var dd   = String(d.getDate()).padStart(2, '0');
+        document.getElementById('form-date').value = yyyy + '-' + mm + '-' + dd;
+    })();
     resetItemRows();
 }
 
@@ -131,7 +143,7 @@ function executeInvoiceGenerationPipeline(event) {
                     .toLocaleDateString('en-US', { day:'numeric', month:'long', year:'numeric' });
     document.getElementById('target-date').textContent = dateStr;
 
-    var tbody     = document.getElementById('target-table-body');
+    var tbody    = document.getElementById('target-table-body');
     tbody.innerHTML = '';
     var grandTotal  = 0;
 
@@ -140,11 +152,11 @@ function executeInvoiceGenerationPipeline(event) {
         var amt  = parseFloat(row.querySelector('.row-amount').value) || 0;
         grandTotal += amt;
         var tr = document.createElement('tr');
-        tr.className = 'text-center align-top font-medium border-b border-black';
+        tr.style.cssText = 'text-align:center; border-bottom:1px solid #d1d5db;';
         tr.innerHTML =
-            '<td class="py-3 px-2 font-mono border-r border-black">' + (i+1) + '.</td>' +
-            '<td class="py-3 px-4 text-left border-r border-black">' + desc + '</td>' +
-            '<td class="py-3 px-4 text-right font-mono">' + formatKD(amt) + '</td>';
+            '<td style="padding:9px 6px; border-right:1px solid #111827; font-family:Montserrat,sans-serif; font-size:11px; font-weight:600;">' + (i+1) + '.</td>' +
+            '<td style="padding:9px 10px; text-align:left; border-right:1px solid #111827; font-family:Montserrat,sans-serif; font-size:11px; font-weight:500;">' + desc + '</td>' +
+            '<td style="padding:9px 10px; text-align:right; font-family:Montserrat,sans-serif; font-size:11px; font-weight:600; font-variant-numeric:tabular-nums;">' + formatKD(amt) + '</td>';
         tbody.appendChild(tr);
     });
 
@@ -158,12 +170,12 @@ function executeInvoiceGenerationPipeline(event) {
         var reader = new FileReader();
         reader.onload = function(e) {
             imgElement.src = e.target.result;
-            imgElement.classList.remove('hidden');
+            imgElement.style.display = 'block';
             showAndExport();
         };
         reader.readAsDataURL(fileInput.files[0]);
     } else {
-        imgElement.classList.add('hidden');
+        imgElement.style.display = 'none';
         imgElement.src = '';
         showAndExport();
     }
@@ -174,35 +186,38 @@ function executeInvoiceGenerationPipeline(event) {
 ════════════════════════════════ */
 function showAndExport() {
     closeSystemModal();
-
-    /* Show invoice sheet */
     renderCanvas.classList.remove('hidden');
+    renderCanvas.style.display = 'flex';
+    renderCanvas.style.flexDirection = 'column';
 
-    /* Swap top-bar buttons */
     btnCreate.classList.add('hidden');
     btnHome.classList.remove('hidden');
     btnNew.classList.remove('hidden');
     btnDownload.classList.remove('hidden');
 
-    /* Double rAF: guarantees browser has painted before capture */
-    requestAnimationFrame(function() {
-        requestAnimationFrame(function() {
-            exportPdf();
+    /* Preload fonts then export */
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function() {
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    exportPdf();
+                });
+            });
         });
-    });
+    } else {
+        setTimeout(exportPdf, 800);
+    }
 }
 
 /* ════════════════════════════════
    PDF EXPORT
-   Key fix: html2canvas ignores oklch when we give it
-   explicit backgroundColor and use Tailwind v3 (hex/rgb only).
 ════════════════════════════════ */
 function exportPdf() {
-    var invoiceNo  = document.getElementById('target-no').textContent || 'Document';
-    var filename   = 'Invoice_No_' + invoiceNo.trim() + '.pdf';
+    var invoiceNo = document.getElementById('target-no').textContent || 'Document';
+    var filename  = 'Invoice_No_' + invoiceNo.trim() + '.pdf';
 
     var opt = {
-        margin:      [0, 0, 0, 0],
+        margin:      [5, 5, 5, 5],
         filename:    filename,
         image:       { type: 'jpeg', quality: 0.98 },
         html2canvas: {
@@ -210,7 +225,8 @@ function exportPdf() {
             useCORS:         true,
             logging:         false,
             letterRendering: true,
-            backgroundColor: '#ffffff'
+            backgroundColor: '#ffffff',
+            windowWidth:     794   /* 210mm at 96dpi */
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
