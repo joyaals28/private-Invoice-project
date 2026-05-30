@@ -6,179 +6,199 @@
     <title>Invoice Generator — Ture Gen. Trad. & Cont. Co.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-zinc-800 min-h-screen p-6 flex flex-col items-center body-text selection:bg-blue-200">
+<body class="bg-zinc-800 min-h-screen p-6 flex flex-col items-center">
 
-    <!-- TOP BAR -->
-    <div id="top-bar" class="w-full max-w-[210mm] flex justify-between items-center mb-6 bg-zinc-900 p-4 rounded-lg shadow-md">
-        <div class="flex items-center gap-3">
-            <button id="btn-home" onclick="goHome()"
-                    class="hidden bg-zinc-700 hover:bg-zinc-600 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-4 rounded shadow transition-all duration-150">
-                &#8962; Home
-            </button>
-            <span id="bar-label" class="text-white font-semibold text-sm tracking-wider uppercase">Invoice System</span>
-        </div>
-        <div class="flex gap-2">
-            <button id="btn-download" onclick="reDownloadPdf()"
-                    class="hidden bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded shadow transition-all duration-150">
-                &#8659; Download PDF
-            </button>
-            <button id="btn-new" onclick="openSystemModal()"
-                    class="hidden bg-zinc-600 hover:bg-zinc-500 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded shadow transition-all duration-150">
-                &#8635; New Invoice
-            </button>
-            <button id="btn-create" onclick="openSystemModal()"
-                    class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded shadow transition-all duration-150">
-                Create Invoice
-            </button>
-        </div>
+<!-- ═══════════════════════════════
+     TOP BAR
+════════════════════════════════ -->
+<div id="top-bar" class="w-full max-w-[210mm] flex justify-between items-center mb-6 bg-zinc-900 p-4 rounded-lg shadow-md">
+    <div class="flex items-center gap-3">
+        <button id="btn-home" onclick="goHome()"
+                class="hidden bg-zinc-700 hover:bg-zinc-600 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-4 rounded shadow">
+            &#8962; Home
+        </button>
+        <span class="text-white font-semibold text-sm tracking-wider uppercase">Invoice System</span>
     </div>
+    <div class="flex gap-2">
+        <button id="btn-download" onclick="reDownloadPdf()"
+                class="hidden bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded shadow">
+            &#8659; Download PDF
+        </button>
+        <button id="btn-new" onclick="openSystemModal()"
+                class="hidden bg-zinc-600 hover:bg-zinc-500 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded shadow">
+            &#8635; New Invoice
+        </button>
+        <button id="btn-create" onclick="openSystemModal()"
+                class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded shadow">
+            Create Invoice
+        </button>
+    </div>
+</div>
 
-    <!-- INVOICE SHEET -->
-    <div id="invoice-render-canvas" class="invoice-sheet shadow-2xl hidden">
+<!-- ═══════════════════════════════
+     INVOICE SHEET
+     Everything uses <table> or
+     explicit pixel/percent layout —
+     NO flexbox, NO floats on the
+     invoice itself so html2canvas
+     captures it correctly.
+════════════════════════════════ -->
+<div id="invoice-render-canvas" class="invoice-sheet shadow-2xl hidden">
 
-        <!-- HEADER — float-based so Arabic never bleeds into English -->
-        <div class="header-wrap">
-            <div class="header-en">
-                <div style="font-family:'Montserrat',sans-serif; font-weight:800; font-size:18px; color:#111827; line-height:1.2;">Ture Gen. Trad. &amp; Cont. Co.</div>
-                <div style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:13px; color:#1f2937; margin-top:3px;">Chacko Al-Kuwaithya</div>
-                <div style="font-family:'Montserrat',sans-serif; font-weight:600; font-size:9px; color:#4b5563; text-transform:uppercase; letter-spacing:1px; margin-top:3px;">Sales &amp; Maintenance Contracting Company</div>
-                <div style="font-family:'Montserrat',sans-serif; font-weight:500; font-size:8.5px; color:#6b7280; line-height:1.7; margin-top:5px;">
+    <!-- HEADER — two-cell table, border-box, no gap tricks -->
+    <table style="width:100%; border-collapse:collapse; border-bottom:2px solid #111; padding-bottom:0; margin-bottom:8px; table-layout:fixed;">
+        <tr>
+            <!-- English: left 50% -->
+            <td style="width:50%; vertical-align:top; padding:0 8px 10px 0;">
+                <div style="font-family:'Poppins',sans-serif; font-weight:700; font-size:17px; color:#111827; line-height:1.2;">Ture Gen. Trad. &amp; Cont. Co.</div>
+                <div style="font-family:'Poppins',sans-serif; font-weight:700; font-size:12px; color:#1f2937; margin-top:3px;">Chacko Al-Kuwaithya</div>
+                <div style="font-family:'Poppins',sans-serif; font-weight:600; font-size:8.5px; color:#4b5563; text-transform:uppercase; letter-spacing:0.8px; margin-top:3px;">Sales &amp; Maintenance Contracting Company</div>
+                <div style="font-family:'Poppins',sans-serif; font-weight:400; font-size:8px; color:#6b7280; margin-top:6px; line-height:1.7;">
                     Sand Filter, Water Heater, Water Pump, Sewage Pump<br>
                     Motor Rewinding, Plumbing &amp; Electrical Works<br>
                     Lathe, Milling, Fabrication, Argon &amp; Welding
                 </div>
-            </div>
-            <div class="header-ar">
-                <div class="arabic-text" style="font-size:22px; font-weight:700; color:#111827; line-height:1.4;">شركة ترو للتجارة العامة والمقاولات</div>
-                <div class="arabic-text" style="font-size:15px; font-weight:700; color:#1f2937; margin-top:2px;">شاكو الكويتية</div>
-                <div class="arabic-text" style="font-size:11px; font-weight:600; color:#4b5563; margin-top:2px;">الصيانة اجهزة معالجة المياة</div>
-                <div class="arabic-text" style="font-size:9.5px; font-weight:500; color:#6b7280; line-height:1.8; margin-top:5px;">
-                    فلتر الرمل - سخان مياه - مضخة مياه - مضخة الصرف الصحي<br>
-                    لف المحركات - السباكة والأشغال الكهربائية<br>
-                    مخرطة - تفريز - تصنيع - لحام أرجون وعادي
+            </td>
+            <!-- Arabic: right 50% -->
+            <td style="width:50%; vertical-align:top; padding:0 0 10px 8px; text-align:right; direction:rtl;">
+                <div class="ar" style="font-size:22px; font-weight:700; color:#111827; line-height:1.3;">شركة ترو للتجارة العامة والمقاولات</div>
+                <div class="ar" style="font-size:14px; font-weight:700; color:#1f2937; margin-top:3px;">شاكو الكويتية</div>
+                <div class="ar" style="font-size:10px; font-weight:400; color:#4b5563; margin-top:3px;">الصيانة أجهزة معالجة المياه</div>
+                <div class="ar" style="font-size:8.5px; font-weight:400; color:#6b7280; margin-top:6px; line-height:1.8;">
+                    فلتر رمال &#8212; سخان مياه &#8212; مضخة مياه &#8212; مضخة صرف صحي<br>
+                    لف المحركات &#8212; سباكة وأشغال كهربائية<br>
+                    مخرطة &#8212; تفريز &#8212; تصنيع &#8212; لحام أرجون وعادي
                 </div>
-            </div>
-        </div>
+            </td>
+        </tr>
+    </table>
 
-        <!-- BADGE -->
-        <div style="text-align:center; margin: 10px 0;">
-            <span class="invoice-badge">CASH / CREDIT INVOICE</span>
-        </div>
+    <!-- BADGE -->
+    <div style="text-align:center; margin:8px 0 10px;">
+        <span style="display:inline-block; border:2px solid #111827; padding:4px 28px; font-family:'Poppins',sans-serif; font-weight:700; font-size:10.5px; letter-spacing:2px; text-transform:uppercase; background:#f3f4f6; color:#111827;">
+            CASH &nbsp;/&nbsp; CREDIT &nbsp; INVOICE
+        </span>
+    </div>
 
-        <!-- META ROW -->
-        <div style="display:flex; justify-content:space-between; font-family:'Montserrat',sans-serif; font-size:12px; font-weight:600; color:#111827; margin-bottom:10px;">
-            <div style="display:flex; flex-direction:column; gap:5px;">
-                <div><span style="font-weight:800;">No :</span>&nbsp;<span id="target-no"></span></div>
-                <div><span style="font-weight:800;">Address :</span>&nbsp;<span id="target-address"></span></div>
-            </div>
-            <div><span style="font-weight:800;">Date :</span>&nbsp;<span id="target-date"></span></div>
-        </div>
+    <!-- META ROW -->
+    <table style="width:100%; border-collapse:collapse; margin-bottom:10px; font-family:'Poppins',sans-serif; font-size:11px; color:#111827;">
+        <tr>
+            <td style="vertical-align:top; padding:0;">
+                <div style="margin-bottom:4px;"><span style="font-weight:700;">No :</span>&nbsp;<span id="target-no" style="font-weight:600;"></span></div>
+                <div><span style="font-weight:700;">Address :</span>&nbsp;<span id="target-address" style="font-weight:600;"></span></div>
+            </td>
+            <td style="vertical-align:top; text-align:right; padding:0;">
+                <div><span style="font-weight:700;">Date :</span>&nbsp;<span id="target-date" style="font-weight:600;"></span></div>
+            </td>
+        </tr>
+    </table>
 
-        <!-- TABLE -->
-        <table style="width:100%; border-collapse:collapse; border:1.5px solid #111827; font-family:'Montserrat',sans-serif; font-size:11px; color:#111827;">
-            <thead>
-                <tr style="background:#f3f4f6; border-bottom:1.5px solid #111827;">
-                    <th style="border-right:1px solid #111827; padding:8px 6px; width:50px; text-align:center; font-weight:800; letter-spacing:0.5px;">SL No.</th>
-                    <th style="border-right:1px solid #111827; padding:8px 10px; text-align:left; font-weight:800; letter-spacing:0.5px;">DESCRIPTION</th>
-                    <th style="padding:8px 10px; width:130px; text-align:right; font-weight:800; letter-spacing:0.5px;">TOTAL AMOUNT</th>
-                </tr>
-            </thead>
-            <tbody id="target-table-body"></tbody>
-            <tfoot>
-                <tr style="border-top:1.5px solid #111827; background:#f9fafb;">
-                    <td colspan="2" style="border-right:1px solid #111827; padding:9px 10px; font-weight:800; font-size:10.5px;">
-                        TOTAL:&nbsp;<span id="target-total-words" style="font-weight:600; font-style:italic; color:#374151;"></span>
-                    </td>
-                    <td id="target-grand-total" style="padding:9px 10px; text-align:right; font-weight:800; font-size:11px;"></td>
-                </tr>
-            </tfoot>
-        </table>
+    <!-- LINE ITEMS TABLE -->
+    <table style="width:100%; border-collapse:collapse; border:1.5px solid #111827; font-family:'Poppins',sans-serif; font-size:10.5px; color:#111827;">
+        <thead>
+            <tr style="background:#f3f4f6; border-bottom:1.5px solid #111827;">
+                <th style="border-right:1px solid #111827; padding:8px 4px; width:48px; text-align:center; font-weight:700; font-size:9.5px; letter-spacing:0.5px; text-transform:uppercase;">SL No.</th>
+                <th style="border-right:1px solid #111827; padding:8px 10px; text-align:left; font-weight:700; font-size:9.5px; letter-spacing:0.5px; text-transform:uppercase;">Description</th>
+                <th style="padding:8px 10px; width:120px; text-align:right; font-weight:700; font-size:9.5px; letter-spacing:0.5px; text-transform:uppercase;">Total Amount</th>
+            </tr>
+        </thead>
+        <tbody id="target-table-body"></tbody>
+        <tfoot>
+            <tr style="border-top:1.5px solid #111827; background:#f3f4f6;">
+                <td colspan="2" style="border-right:1px solid #111827; padding:8px 10px; font-family:'Poppins',sans-serif; font-weight:700; font-size:10px;">
+                    TOTAL:&nbsp;<span id="target-total-words" style="font-weight:500; font-style:italic; color:#374151;"></span>
+                </td>
+                <td id="target-grand-total" style="padding:8px 10px; text-align:right; font-family:'Poppins',sans-serif; font-weight:700; font-size:10.5px;"></td>
+            </tr>
+        </tfoot>
+    </table>
 
-        <!-- SPACER pushes signatures to bottom -->
-        <div style="flex:1; min-height:30mm;"></div>
-
-        <!-- SIGNATURES -->
-        <div style="display:grid; grid-template-columns:1fr 1fr; padding:0 20px; margin-bottom:12px;">
-            <div style="display:flex; flex-direction:column; align-items:center;">
-                <div style="height:50px;"></div>
-                <div style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:10px; color:#1f2937; border-top:1.5px solid #111827; width:140px; text-align:center; padding-top:5px; margin-top:4px;">Receiver Sign</div>
-            </div>
-            <div style="display:flex; flex-direction:column; align-items:center;">
-                <div style="height:50px; display:flex; align-items:center; justify-content:center;">
-                    <img id="target-salesman-sig-img" src="" style="max-height:48px; object-fit:contain; display:none;" alt="Signature">
+    <!-- SIGNATURES — positioned with spacer row -->
+    <table style="width:100%; border-collapse:collapse; margin-top:28mm;">
+        <tr>
+            <td style="width:50%; text-align:center; vertical-align:bottom; padding:0 20px;">
+                <div style="height:44px;"></div>
+                <div style="width:140px; border-top:1.5px solid #111827; margin:0 auto; padding-top:5px; font-family:'Poppins',sans-serif; font-weight:700; font-size:10px; color:#1f2937; text-align:center;">Receiver Sign</div>
+            </td>
+            <td style="width:50%; text-align:center; vertical-align:bottom; padding:0 20px;">
+                <div style="height:44px; display:flex; align-items:center; justify-content:center;">
+                    <img id="target-salesman-sig-img" src="" style="max-height:44px; max-width:140px; object-fit:contain; display:none;" alt="Signature">
                 </div>
-                <div style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:10px; color:#1f2937; border-top:1.5px solid #111827; width:140px; text-align:center; padding-top:5px; margin-top:4px;">Salesman Sign</div>
-            </div>
-        </div>
+                <div style="width:140px; border-top:1.5px solid #111827; margin:0 auto; padding-top:5px; font-family:'Poppins',sans-serif; font-weight:700; font-size:10px; color:#1f2937; text-align:center;">Salesman Sign</div>
+            </td>
+        </tr>
+    </table>
 
-        <!-- FOOTER -->
-        <div style="border-top:1.5px solid #111827; padding-top:7px;">
-            <div class="footer-ar arabic-text">الشويخ الصناعية - مجمع املاك الدولة - المبنى ١٠٦/١٠٣ - الدور الأرضي - محل رقم ٤٦ - تلفون : ٩٧٩٥٦٩٣٢ - ٥١٧٧٢٧٩١ - ٦٥٧٥٦١٥٦</div>
-            <div class="footer-en">Shuwaikh Industrial - Amlak Al-Dawliya Comp. Bldg. 103/106 - Ground Floor - Shop No. 46 - Tel. 97956932 - 51772791 - 65756156</div>
+    <!-- FOOTER -->
+    <div style="border-top:1.5px solid #111827; margin-top:10px; padding-top:6px; text-align:center;">
+        <div class="ar" style="font-size:10.5px; font-weight:700; color:#374151; line-height:1.7; text-align:center; direction:rtl; unicode-bidi:embed;">
+            الشويخ الصناعية &#8722; مجمع أملاك الدولة &#8722; المبنى ١٠٣/١٠٦ &#8722; الدور الأرضي &#8722; محل رقم ٤٦ &#8722; تلفون : ٩٧٩٥٦٩٣٢ &#8722; ٥١٧٧٢٧٩١ &#8722; ٦٥٧٥٦١٥٦
+        </div>
+        <div style="font-family:'Poppins',sans-serif; font-size:8.5px; font-weight:600; color:#374151; margin-top:3px;">
+            Shuwaikh Industrial - Amlak Al-Dawliya Comp. Bldg. 103/106 - Ground Floor - Shop No. 46 - Tel. 97956932 - 51772791 - 65756156
         </div>
     </div>
 
-    <!-- MODAL -->
-    <div id="system-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden p-4 z-50">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 border border-gray-200">
-            <div class="flex justify-between items-center border-b pb-3 mb-4">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-gray-700">Invoice Specification Form</h3>
-                <button onclick="closeSystemModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
-            </div>
-            <form id="invoice-data-form" onsubmit="executeInvoiceGenerationPipeline(event)" class="space-y-4 text-xs">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-bold text-gray-600 uppercase mb-1">No:</label>
-                        <input type="text" id="form-no" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium">
-                    </div>
-                    <div>
-                        <label class="block font-bold text-gray-600 uppercase mb-1">Date:</label>
-                        <input type="date" id="form-date" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium font-mono">
-                    </div>
-                </div>
-                <div>
-                    <label class="block font-bold text-gray-600 uppercase mb-1">Address:</label>
-                    <input type="text" id="form-address" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium">
-                </div>
-                <hr class="border-gray-200">
-                <div id="dynamic-records-box" class="space-y-3">
-                    <div class="item-entry bg-gray-50 p-3 rounded border border-gray-200 relative">
-                        <div class="flex justify-between items-center mb-1.5">
-                            <span class="font-bold text-blue-600 uppercase tracking-wide text-xs">Item Record #<span class="index-badge">1</span></span>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2">
-                            <div class="col-span-2">
-                                <input type="text" placeholder="Description" required class="row-desc w-full border border-gray-300 rounded p-2 text-xs focus:outline-none focus:border-blue-500 font-medium">
-                            </div>
-                            <div>
-                                <input type="number" placeholder="Amount (KD)" required step="0.001" min="0" class="row-amount w-full border border-gray-300 rounded p-2 text-xs focus:outline-none focus:border-blue-500 font-medium font-mono">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex justify-start">
-                    <button type="button" onclick="appendNewItemFormRow()" class="text-blue-600 hover:text-blue-800 font-bold tracking-wide flex items-center gap-1 uppercase text-[10px]">
-                        + Add Line Item
-                    </button>
-                </div>
-                <hr class="border-gray-200">
-                <div>
-                    <label class="block font-bold text-gray-600 uppercase mb-1">Salesman Signature Image (Optional PNG):</label>
-                    <input type="file" id="form-sig-file" accept="image/png" class="w-full text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-blue-50 file:text-blue-700 file:cursor-pointer hover:file:bg-blue-100">
-                </div>
-                <div class="flex justify-end gap-2 pt-4 border-t border-gray-100">
-                    <button type="button" onclick="closeSystemModal()" class="px-4 py-2 font-bold text-gray-500 uppercase tracking-wider bg-gray-100 hover:bg-gray-200 rounded">Cancel</button>
-                    <button type="submit" class="px-4 py-2 font-bold text-white uppercase tracking-wider bg-green-600 hover:bg-green-700 rounded shadow">Confirm &amp; Export</button>
-                </div>
-            </form>
-        </div>
-    </div>
+</div><!-- /invoice-render-canvas -->
 
-    <script src="invoice.js"></script>
+<!-- ═══════════════════════════════
+     MODAL
+════════════════════════════════ -->
+<div id="system-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden p-4 z-50">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 border border-gray-200">
+        <div class="flex justify-between items-center border-b pb-3 mb-4">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-gray-700">Invoice Specification Form</h3>
+            <button onclick="closeSystemModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+        </div>
+        <form id="invoice-data-form" onsubmit="executeInvoiceGenerationPipeline(event)" class="space-y-4 text-xs">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-bold text-gray-600 uppercase mb-1">No:</label>
+                    <input type="text" id="form-no" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-600 uppercase mb-1">Date:</label>
+                    <input type="date" id="form-date" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium font-mono">
+                </div>
+            </div>
+            <div>
+                <label class="block font-bold text-gray-600 uppercase mb-1">Address:</label>
+                <input type="text" id="form-address" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium">
+            </div>
+            <hr class="border-gray-200">
+            <div id="dynamic-records-box" class="space-y-3">
+                <div class="item-entry bg-gray-50 p-3 rounded border border-gray-200">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <span class="font-bold text-blue-600 uppercase tracking-wide text-xs">Item Record #<span class="index-badge">1</span></span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="col-span-2">
+                            <input type="text" placeholder="Description" required class="row-desc w-full border border-gray-300 rounded p-2 text-xs focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <input type="number" placeholder="Amount (KD)" required step="0.001" min="0" class="row-amount w-full border border-gray-300 rounded p-2 text-xs focus:outline-none focus:border-blue-500 font-mono">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="appendNewItemFormRow()" class="text-blue-600 hover:text-blue-800 font-bold uppercase text-[10px] tracking-wide">
+                + Add Line Item
+            </button>
+            <hr class="border-gray-200">
+            <div>
+                <label class="block font-bold text-gray-600 uppercase mb-1">Salesman Signature (Optional PNG/JPG):</label>
+                <input type="file" id="form-sig-file" accept="image/*" class="w-full text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-blue-50 file:text-blue-700 file:cursor-pointer hover:file:bg-blue-100">
+            </div>
+            <div class="flex justify-end gap-2 pt-4 border-t border-gray-100">
+                <button type="button" onclick="closeSystemModal()" class="px-4 py-2 font-bold text-gray-500 uppercase tracking-wider bg-gray-100 hover:bg-gray-200 rounded">Cancel</button>
+                <button type="submit" class="px-4 py-2 font-bold text-white uppercase tracking-wider bg-green-600 hover:bg-green-700 rounded shadow">Confirm &amp; Export</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="invoice.js"></script>
 </body>
 </html>
