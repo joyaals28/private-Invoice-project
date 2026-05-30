@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════
-   invoice.js — Engine Core Automation Pipeling
+   invoice.js — Engine Core Automation Pipeline
    ══════════════════════════════════════════════════ */
 
 var systemModal       = document.getElementById('system-modal');
@@ -144,46 +144,20 @@ function executeInvoiceGenerationPipeline(e) {
     document.getElementById('target-grand-total').textContent = cumulativeSum.toFixed(3) + ' KD';
     document.getElementById('target-total-words').textContent = toWords(cumulativeSum);
 
-    // Dynamic stream handling logic
     var logoFile = document.getElementById('form-logo-file');
     var logoImg = document.getElementById('target-logo-img');
     var sigFile = document.getElementById('form-sig-file');
     var sigImg = document.getElementById('target-salesman-sig-img');
 
-    var readLogo = function(callback) {
-        if (logoFile.files && logoFile.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function(ev) {
-                logoImg.src = ev.target.result;
-                logoImg.style.display = 'block';
-                callback();
-            };
-            reader.readAsDataURL(logoFile.files[0]);
-        } else {
-            logoImg.style.display = 'none';
-            logoImg.src = '';
-            callback();
-        }
-    };
+    // Helper to run PDF generation only when assets are strictly confirmed loaded
+    var assetsLoadedCount = 0;
+    var assetsNeededCount = 0;
+    
+    if (logoFile.files && logoFile.files[0]) assetsNeededCount++;
+    if (sigFile.files && sigFile.files[0]) assetsNeededCount++;
 
-    var readSig = function(callback) {
-        if (sigFile.files && sigFile.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function(ev) {
-                sigImg.src = ev.target.result;
-                sigImg.style.display = 'block';
-                callback();
-            };
-            reader.readAsDataURL(sigFile.files[0]);
-        } else {
-            sigImg.style.display = 'none';
-            sigImg.src = '';
-            callback();
-        }
-    };
-
-    readLogo(function() {
-        readSig(function() {
+    function checkAndFinalize() {
+        if (assetsLoadedCount >= assetsNeededCount) {
             closeSystemModal();
             renderCanvas.classList.remove('hidden');
             btnCreate.classList.add('hidden');
@@ -191,9 +165,49 @@ function executeInvoiceGenerationPipeline(e) {
             btnNew.classList.remove('hidden');
             btnDownload.classList.remove('hidden');
             
-            setTimeout(function() { exportPdf(); }, 400);
-        });
-    });
+            // Allow a small rendering tick for the DOM styles to set, then print
+            setTimeout(function() { exportPdf(); }, 450);
+        }
+    }
+
+    // Process Corporate Logo Upload Stream
+    if (logoFile.files && logoFile.files[0]) {
+        var logoReader = new FileReader();
+        logoReader.onload = function(ev) {
+            logoImg.onload = function() {
+                assetsLoadedCount++;
+                checkAndFinalize();
+            };
+            logoImg.src = ev.target.result;
+            logoImg.style.display = 'block';
+        };
+        logoReader.readAsDataURL(logoFile.files[0]);
+    } else {
+        logoImg.style.display = 'none';
+        logoImg.src = '';
+    }
+
+    // Process Salesman Signature Upload Stream
+    if (sigFile.files && sigFile.files[0]) {
+        var sigReader = new FileReader();
+        sigReader.onload = function(ev) {
+            sigImg.onload = function() {
+                assetsLoadedCount++;
+                checkAndFinalize();
+            };
+            sigImg.src = ev.target.result;
+            sigImg.style.display = 'block';
+        };
+        sigReader.readAsDataURL(sigFile.files[0]);
+    } else {
+        sigImg.style.display = 'none';
+        sigImg.src = '';
+    }
+
+    // Fallback if zero images were uploaded
+    if (assetsNeededCount === 0) {
+        checkAndFinalize();
+    }
 }
 
 function exportPdf() {
