@@ -30,7 +30,8 @@ function goHome() {
     btnCreate.classList.remove('hidden');
     document.getElementById('invoice-data-form').reset();
     resetItemRows();
-    // Re-verify static logo state
+    
+    // Maintain logo preview layout baseline state
     var logoImg = document.getElementById('target-logo-img');
     logoImg.src = "images/Logo.png";
     logoImg.style.display = 'block';
@@ -155,9 +156,9 @@ function executeInvoiceGenerationPipeline(e) {
     var assetsLoadedCount = 0;
     var assetsNeededCount = 0;
     
-    // Check if the logo image element itself is fully ready and painted inside DOM bounds
+    // Check if image folder asset is already loaded and ready in background
     if (logoImg.complete && logoImg.naturalWidth !== 0) {
-        // Already fully cached and loaded by the browser engine locally
+        // Cached natively
     } else {
         assetsNeededCount++;
         logoImg.onload = function() {
@@ -165,7 +166,6 @@ function executeInvoiceGenerationPipeline(e) {
             checkAndFinalize();
         };
         logoImg.onerror = function() {
-            console.warn("Local path logo asset failed download pass. Checking backup arrays.");
             assetsLoadedCount++;
             checkAndFinalize();
         };
@@ -182,12 +182,11 @@ function executeInvoiceGenerationPipeline(e) {
             btnNew.classList.remove('hidden');
             btnDownload.classList.remove('hidden');
             
-            // Allow layout engines to settle cleanly, then process
-            setTimeout(function() { exportPdf(); }, 500);
+            setTimeout(function() { exportPdf(); }, 400);
         }
     }
 
-    // Process Salesman Signature Upload Stream cleanly
+    // Process Signature Upload Stream
     if (sigFile.files && sigFile.files[0]) {
         var sigReader = new FileReader();
         sigReader.onload = function(ev) {
@@ -227,7 +226,8 @@ function exportPdf() {
             letterRendering: true,
             backgroundColor: '#ffffff'
         },
-        // Strict single page hard cutoff filter configuration
+        // Avoid auto page breaks and clip rendering bounds to force page 1 constraints
+        pagebreak: { mode: 'avoid' },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
     };
 
