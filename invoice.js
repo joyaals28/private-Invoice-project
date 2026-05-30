@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════
-   invoice.js  —  Ture Gen. Invoice System
+   invoice.js — Engine Core Automation Pipeling
    ══════════════════════════════════════════════════ */
 
 var systemModal       = document.getElementById('system-modal');
@@ -10,20 +10,18 @@ var btnNew            = document.getElementById('btn-new');
 var btnDownload       = document.getElementById('btn-download');
 var btnCreate         = document.getElementById('btn-create');
 
-/* ── Today's date ── */
+// Auto assign current timezone standard ISO formats
 (function() {
-    var d    = new Date();
+    var d = new Date();
     var yyyy = d.getFullYear();
-    var mm   = String(d.getMonth() + 1).padStart(2, '0');
-    var dd   = String(d.getDate()).padStart(2, '0');
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
     document.getElementById('form-date').value = yyyy + '-' + mm + '-' + dd;
 })();
 
-/* ════════ MODAL ════════ */
 function openSystemModal()  { systemModal.classList.remove('hidden'); }
 function closeSystemModal() { systemModal.classList.add('hidden'); }
 
-/* ════════ HOME ════════ */
 function goHome() {
     renderCanvas.classList.add('hidden');
     btnHome.classList.add('hidden');
@@ -31,13 +29,6 @@ function goHome() {
     btnDownload.classList.add('hidden');
     btnCreate.classList.remove('hidden');
     document.getElementById('invoice-data-form').reset();
-    (function() {
-        var d = new Date();
-        document.getElementById('form-date').value =
-            d.getFullYear() + '-' +
-            String(d.getMonth()+1).padStart(2,'0') + '-' +
-            String(d.getDate()).padStart(2,'0');
-    })();
     resetItemRows();
 }
 
@@ -57,152 +48,184 @@ function makeItemRow(n, removable) {
         '</div></div>';
 }
 
-/* ════════ LINE ITEMS ════════ */
 function appendNewItemFormRow() {
     var n = dynamicRecordsBox.getElementsByClassName('item-entry').length + 1;
     dynamicRecordsBox.insertAdjacentHTML('beforeend', makeItemRow(n, true));
 }
+
 function reindex() {
     Array.from(dynamicRecordsBox.getElementsByClassName('item-entry'))
         .forEach(function(el, i) { el.querySelector('.index-badge').textContent = i + 1; });
 }
 
-/* ════════ FORMATTING ════════ */
-function formatKD(n) {
-    return parseFloat(n).toFixed(3) + ' KD';
-}
-
 function toWords(amount) {
     var rounded = Math.round(amount * 1000) / 1000;
-    var dinars  = Math.floor(rounded);
-    var fils    = Math.round((rounded - dinars) * 1000);
-    var u = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten',
-             'Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
-    var t = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
-    function h(v) {
-        var s = '';
-        if (v >= 100) { s += u[Math.floor(v/100)] + ' Hundred '; v %= 100; }
-        if (v >= 20)  { s += t[Math.floor(v/10)] + ' '; v %= 10; }
-        if (v > 0)      s += u[v] + ' ';
-        return s.trim();
+    var dinars = Math.floor(rounded);
+    var fils = Math.round((rounded - dinars) * 1000);
+    
+    var units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+                 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    var tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    
+    function convertUnderThousand(value) {
+        var str = '';
+        if (value >= 100) {
+            str += units[Math.floor(value / 100)] + ' Hundred ';
+            value %= 100;
+        }
+        if (value >= 20) {
+            str += tens[Math.floor(value / 10)] + ' ';
+            value %= 10;
+        }
+        if (value > 0) {
+            str += units[value] + ' ';
+        }
+        return str.trim();
     }
-    function words(n) {
-        if (!n) return 'Zero';
-        var w = '';
-        if (n >= 1000000) { w += h(Math.floor(n/1000000)) + ' Million '; n %= 1000000; }
-        if (n >= 1000)    { w += h(Math.floor(n/1000)) + ' Thousand '; n %= 1000; }
-        if (n > 0)          w += h(n);
-        return w.trim();
+    
+    function compileEngine(num) {
+        if (!num) return '';
+        var track = '';
+        if (num >= 1000000) {
+            track += convertUnderThousand(Math.floor(num / 1000000)) + ' Million ';
+            num %= 1000000;
+        }
+        if (num >= 1000) {
+            track += convertUnderThousand(Math.floor(num / 1000)) + ' Thousand ';
+            num %= 1000;
+        }
+        if (num > 0) {
+            track += convertUnderThousand(num);
+        }
+        return track.trim();
     }
-    var out = words(dinars) + ' KD';
-    if (fils > 0) out += ' and ' + words(fils) + ' Fils';
-    return (out + ' Only').replace(/\s+/g, ' ');
+    
+    if (dinars === 0 && fils === 0) return 'Zero KD Only';
+    
+    var outputWords = '';
+    if (dinars > 0) {
+        outputWords += compileEngine(dinars) + ' KD';
+    }
+    if (fils > 0) {
+        if (dinars > 0) outputWords += ' and ';
+        outputWords += convertUnderThousand(fils) + ' Fils';
+    }
+    return (outputWords + ' Only').replace(/\s+/g, ' ');
 }
 
-/* ════════ BUILD INVOICE ════════ */
 function executeInvoiceGenerationPipeline(e) {
     e.preventDefault();
 
-    document.getElementById('target-no').textContent      = document.getElementById('form-no').value;
+    document.getElementById('target-no').textContent = document.getElementById('form-no').value;
     document.getElementById('target-address').textContent = document.getElementById('form-address').value;
 
-    var p = document.getElementById('form-date').value.split('-');
+    var dateParts = document.getElementById('form-date').value.split('-');
     document.getElementById('target-date').textContent =
-        new Date(+p[0], +p[1]-1, +p[2]).toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'});
+        new Date(+dateParts[0], +dateParts[1] - 1, +dateParts[2]).toLocaleDateString('en-US', {day:'numeric', month:'long', year:'numeric'});
 
     var tbody = document.getElementById('target-table-body');
     tbody.innerHTML = '';
-    var total = 0;
+    var cumulativeSum = 0;
 
     Array.from(dynamicRecordsBox.getElementsByClassName('item-entry')).forEach(function(row, i) {
-        var desc = row.querySelector('.row-desc').value;
-        var amt  = parseFloat(row.querySelector('.row-amount').value) || 0;
-        total += amt;
+        var description = row.querySelector('.row-desc').value;
+        var rowAmount = parseFloat(row.querySelector('.row-amount').value) || 0;
+        cumulativeSum += rowAmount;
+        
         var tr = document.createElement('tr');
-        tr.style.borderBottom = '1px solid #d1d5db';
+        tr.style.borderBottom = '1px solid #111827';
         tr.innerHTML =
-            '<td style="padding:8px 4px; text-align:center; border-right:1px solid #111827; font-family:Poppins,sans-serif; font-weight:600; font-size:10.5px;">' + (i+1) + '.</td>' +
-            '<td style="padding:8px 10px; text-align:left; border-right:1px solid #111827; font-family:Poppins,sans-serif; font-size:10.5px;">' + desc + '</td>' +
-            '<td style="padding:8px 10px; text-align:right; font-family:Poppins,sans-serif; font-weight:600; font-size:10.5px; font-variant-numeric:tabular-nums;">' + formatKD(amt) + '</td>';
+            '<td style="padding:7px 4px; text-align:center; border-right:1px solid #111827; font-weight:600; font-size:10px;">' + (i + 1) + '.</td>' +
+            '<td style="padding:7px 8px; text-align:left; border-right:1px solid #111827; font-size:10px; whitespace:normal; word-break:break-word;">' + description + '</td>' +
+            '<td style="padding:7px 8px; text-align:right; font-weight:600; font-size:10px; font-variant-numeric:tabular-nums;">' + rowAmount.toFixed(3) + ' KD</td>';
         tbody.appendChild(tr);
     });
 
-    document.getElementById('target-grand-total').textContent = formatKD(total);
-    document.getElementById('target-total-words').textContent = toWords(total);
+    document.getElementById('target-grand-total').textContent = cumulativeSum.toFixed(3) + ' KD';
+    document.getElementById('target-total-words').textContent = toWords(cumulativeSum);
 
+    // Dynamic stream handling logic
+    var logoFile = document.getElementById('form-logo-file');
+    var logoImg = document.getElementById('target-logo-img');
     var sigFile = document.getElementById('form-sig-file');
-    var sigImg  = document.getElementById('target-salesman-sig-img');
+    var sigImg = document.getElementById('target-salesman-sig-img');
 
-    if (sigFile.files && sigFile.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(ev) {
-            sigImg.src = ev.target.result;
-            sigImg.style.display = 'block';
-            showAndExport();
-        };
-        reader.readAsDataURL(sigFile.files[0]);
-    } else {
-        sigImg.style.display = 'none';
-        sigImg.src = '';
-        showAndExport();
-    }
-}
-
-/* ════════ SHOW + EXPORT ════════ */
-function showAndExport() {
-    closeSystemModal();
-    renderCanvas.classList.remove('hidden');
-    btnCreate.classList.add('hidden');
-    btnHome.classList.remove('hidden');
-    btnNew.classList.remove('hidden');
-    btnDownload.classList.remove('hidden');
-
-    /* Wait for fonts to be ready, then export */
-    var doExport = function() {
-        requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
-                exportPdf();
-            });
-        });
+    var readLogo = function(callback) {
+        if (logoFile.files && logoFile.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                logoImg.src = ev.target.result;
+                logoImg.style.display = 'block';
+                callback();
+            };
+            reader.readAsDataURL(logoFile.files[0]);
+        } else {
+            logoImg.style.display = 'none';
+            logoImg.src = '';
+            callback();
+        }
     };
 
-    if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(doExport);
-    } else {
-        setTimeout(doExport, 1000);
-    }
+    var readSig = function(callback) {
+        if (sigFile.files && sigFile.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                sigImg.src = ev.target.result;
+                sigImg.style.display = 'block';
+                callback();
+            };
+            reader.readAsDataURL(sigFile.files[0]);
+        } else {
+            sigImg.style.display = 'none';
+            sigImg.src = '';
+            callback();
+        }
+    };
+
+    readLogo(function() {
+        readSig(function() {
+            closeSystemModal();
+            renderCanvas.classList.remove('hidden');
+            btnCreate.classList.add('hidden');
+            btnHome.classList.remove('hidden');
+            btnNew.classList.remove('hidden');
+            btnDownload.classList.remove('hidden');
+            
+            setTimeout(function() { exportPdf(); }, 400);
+        });
+    });
 }
 
-/* ════════ PDF EXPORT ════════ */
 function exportPdf() {
-    var no       = document.getElementById('target-no').textContent.trim() || 'Document';
-    var filename = 'Invoice_No_' + no + '.pdf';
+    var invoiceNo = document.getElementById('target-no').textContent.trim() || 'Doc';
+    var filename = 'Invoice_No_' + invoiceNo + '.pdf';
 
-    btnDownload.textContent = '⏳ Generating…';
-    btnDownload.disabled    = true;
+    btnDownload.textContent = '⏳ Processing…';
+    btnDownload.disabled = true;
 
-    var opt = {
-        margin:      [5, 5, 5, 5],
-        filename:    filename,
-        image:       { type: 'jpeg', quality: 0.98 },
+    var configOptions = {
+        margin: [0, 0, 0, 0],
+        filename: filename,
+        image: { type: 'jpeg', quality: 1.0 },
         html2canvas: {
-            scale:           2,
-            useCORS:         true,
-            logging:         false,
+            scale: 3,
+            useCORS: true,
+            logging: false,
+            letterRendering: true,
             backgroundColor: '#ffffff'
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(renderCanvas).save()
+    html2pdf().set(configOptions).from(renderCanvas).save()
         .then(function() {
             btnDownload.innerHTML = '&#8659; Download PDF';
-            btnDownload.disabled  = false;
+            btnDownload.disabled = false;
         })
         .catch(function(err) {
             btnDownload.innerHTML = '&#8659; Download PDF';
-            btnDownload.disabled  = false;
-            alert('PDF export failed: ' + err.message);
+            btnDownload.disabled = false;
+            alert('Generation error: ' + err.message);
         });
 }
 
