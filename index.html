@@ -3,48 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice Generator</title>
+    <title>Invoice Generator — Ture Gen. Trad. & Cont. Co.</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cinzel:wght@500;700&family=Montserrat:wght@400;500;600;700&display=swap');
-        
-        .company-title-en { font-family: 'Cinzel', serif; font-weight: 700; color: #111827; }
-        .company-title-ar { font-family: 'Amiri', serif; font-weight: 700; color: #111827; }
-        .body-text { font-family: 'Montserrat', sans-serif; }
-        
-        .invoice-sheet {
-            width: 210mm;
-            min-height: 297mm;
-            padding: 20mm 15mm;
-            background: white;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-zinc-800 min-h-screen p-6 flex flex-col items-center body-text selection:bg-blue-200">
 
-    <div class="w-full max-w-[210mm] flex justify-between items-center mb-6 bg-zinc-900 p-4 rounded-lg shadow-md">
-        <span class="text-white font-semibold text-sm tracking-wider uppercase">Invoice System Panel</span>
-        <button onclick="openSystemModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded shadow transition-all duration-150">
-            Create Invoice Document
-        </button>
+    <!-- TOP BAR -->
+    <div id="top-bar" class="w-full max-w-[210mm] flex justify-between items-center mb-6 bg-zinc-900 p-4 rounded-lg shadow-md">
+        <div class="flex items-center gap-3">
+            <button id="btn-home" onclick="goHome()"
+                    class="hidden bg-zinc-700 hover:bg-zinc-600 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-4 rounded shadow transition-all duration-150">
+                &#8962; Home
+            </button>
+            <span id="bar-label" class="text-white font-semibold text-sm tracking-wider uppercase">Invoice System</span>
+        </div>
+        <div class="flex gap-2">
+            <button id="btn-download" onclick="reDownloadPdf()"
+                    class="hidden bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded shadow transition-all duration-150">
+                &#8659; Download PDF
+            </button>
+            <button id="btn-new" onclick="openSystemModal()"
+                    class="hidden bg-zinc-600 hover:bg-zinc-500 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded shadow transition-all duration-150">
+                &#8635; New Invoice
+            </button>
+            <button onclick="openSystemModal()"
+                    class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider py-2.5 px-5 rounded shadow transition-all duration-150">
+                Create Invoice
+            </button>
+        </div>
     </div>
 
+    <!-- INVOICE SHEET -->
     <div id="invoice-render-canvas" class="invoice-sheet shadow-2xl relative flex flex-col justify-between hidden">
         <div>
             <div class="grid grid-cols-2 gap-4 border-b border-black pb-4">
                 <div class="text-left space-y-0.5">
-                    <h1 class="company-title-en text-[22px] tracking-tight leading-none">Ture Gen. Trad. & Cont. Co.</h1>
+                    <h1 class="company-title-en text-[22px] tracking-tight leading-none">Ture Gen. Trad. &amp; Cont. Co.</h1>
                     <h2 class="text-[15px] font-bold text-neutral-800">Chacko Al-Kuwaithya</h2>
-                    <h3 class="text-[11px] font-semibold text-neutral-600 uppercase tracking-wide">Sales & Maintenance Contracting Company</h3>
+                    <h3 class="text-[11px] font-semibold text-neutral-600 uppercase tracking-wide">Sales &amp; Maintenance Contracting Company</h3>
                     <p class="text-[9.5px] font-medium text-neutral-500 leading-tight pt-1">
                         Sand Fitter, Water Heater, Water Pumb, Sewage Pump<br>
-                        Motor Rewinding, Plumbing & Electrical Works<br>
-                        Lathe, Midling, Fabrication, orgon & Welding
+                        Motor Rewinding, Plumbing &amp; Electrical Works<br>
+                        Lathe, Midling, Fabrication, orgon &amp; Welding
                     </p>
                 </div>
-                
                 <div class="text-right space-y-0.5" dir="rtl">
                     <h1 class="company-title-ar text-[26px] tracking-tight leading-none">شركة ترو للتجارة العامة والمقاولات</h1>
                     <h2 class="text-[17px] font-bold text-neutral-800">شاكو الكويتية</h2>
@@ -65,12 +69,12 @@
 
             <div class="grid grid-cols-2 text-sm mb-6 pt-1 font-medium text-neutral-900">
                 <div class="space-y-2">
-                    <p class="flex items-center">
-                        <span class="w-18 font-bold">No :</span>
+                    <p class="flex items-center gap-1">
+                        <span class="font-bold">No :</span>
                         <span id="target-no" class="font-semibold"></span>
                     </p>
-                    <p class="flex items-start">
-                        <span class="w-18 font-bold">Address :</span>
+                    <p class="flex items-start gap-1">
+                        <span class="font-bold">Address :</span>
                         <span id="target-address" class="font-semibold break-all max-w-xs"></span>
                     </p>
                 </div>
@@ -90,8 +94,7 @@
                         <th class="py-2.5 px-4 text-right w-36">TOTAL AMOUNT</th>
                     </tr>
                 </thead>
-                <tbody id="target-table-body" class="divide-y divide-black">
-                    </tbody>
+                <tbody id="target-table-body" class="divide-y divide-black"></tbody>
                 <tfoot>
                     <tr class="border-t border-black font-bold bg-neutral-50 text-[11px]">
                         <td colspan="2" class="border-r border-black py-3 px-4 text-left">
@@ -110,7 +113,6 @@
                     <div class="h-16 flex items-end"></div>
                     <p class="text-xs font-bold text-neutral-800 border-t border-black w-40 text-center pt-1.5 mt-2">Receiver Sign</p>
                 </div>
-                
                 <div class="flex flex-col items-center justify-end">
                     <div class="h-16 flex items-center justify-center max-w-[150px]">
                         <img id="target-salesman-sig-img" src="" class="max-h-16 object-contain hidden" alt="Signature">
@@ -118,7 +120,6 @@
                     <p class="text-xs font-bold text-neutral-800 border-t border-black w-40 text-center pt-1.5 mt-2">Salesman Sign</p>
                 </div>
             </div>
-
             <div class="border-t border-black pt-3 text-center space-y-0.5 text-[9px] text-neutral-600 font-semibold leading-tight">
                 <p class="company-title-ar text-[11px]" dir="rtl">الشويخ الصناعية - مجمع املاك الدولة - المبنى ١٠٦/١٠٣ - الدور الأرضي - محل رقم ٤٦ - تلفون : ١٧٩٥٦٩٣٦ - ٥٥٩٨٩٨٣٦ - ١٥١٥٦١٥٦</p>
                 <p>Shuwaikh Industrial - Amlak Al-Dawliya Comp. Bldg. 103/106-Ground Floor - Shop No. 46 - Tel. 97956932-51772791-65756156</p>
@@ -126,14 +127,13 @@
         </div>
     </div>
 
-
+    <!-- MODAL -->
     <div id="system-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden p-4 z-50">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 border border-neutral-200">
             <div class="flex justify-between items-center border-b pb-3 mb-4">
                 <h3 class="text-sm font-bold uppercase tracking-wider text-neutral-700">Invoice Specification Form</h3>
                 <button onclick="closeSystemModal()" class="text-neutral-400 hover:text-neutral-600 text-2xl leading-none">&times;</button>
             </div>
-
             <form id="invoice-data-form" onsubmit="executeInvoiceGenerationPipeline(event)" class="space-y-4 text-xs">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -145,14 +145,11 @@
                         <input type="date" id="form-date" required class="w-full border border-neutral-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium font-mono">
                     </div>
                 </div>
-
                 <div>
                     <label class="block font-bold text-neutral-600 uppercase mb-1">Address:</label>
                     <input type="text" id="form-address" required class="w-full border border-neutral-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium">
                 </div>
-
-                <hr class="border-neutral-200 my-1">
-
+                <hr class="border-neutral-200">
                 <div id="dynamic-records-box" class="space-y-3">
                     <div class="item-entry bg-neutral-50 p-3 rounded border border-neutral-200 relative">
                         <div class="flex justify-between items-center mb-1.5">
@@ -163,186 +160,29 @@
                                 <input type="text" placeholder="Description" required class="row-desc w-full border border-neutral-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium">
                             </div>
                             <div>
-                                <input type="number" placeholder="Amount (KD)" required class="row-amount w-full border border-neutral-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium font-mono">
+                                <input type="number" placeholder="Amount (KD)" required step="0.001" min="0" class="row-amount w-full border border-neutral-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium font-mono">
                             </div>
                         </div>
                     </div>
                 </div>
-
                 <div class="flex justify-start">
                     <button type="button" onclick="appendNewItemFormRow()" class="text-blue-600 hover:text-blue-800 font-bold tracking-wide flex items-center gap-1 uppercase text-[10px]">
                         + Add Line Item
                     </button>
                 </div>
-
-                <hr class="border-neutral-200 my-1">
-
+                <hr class="border-neutral-200">
                 <div>
                     <label class="block font-bold text-neutral-600 uppercase mb-1">Salesman Signature Image (Optional PNG):</label>
                     <input type="file" id="form-sig-file" accept="image/png" class="w-full text-neutral-500 file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-blue-50 file:text-blue-700 file:cursor-pointer hover:file:bg-blue-100">
                 </div>
-
                 <div class="flex justify-end gap-2 pt-4 border-t border-neutral-100">
                     <button type="button" onclick="closeSystemModal()" class="px-4 py-2 font-bold text-neutral-500 uppercase tracking-wider bg-neutral-100 hover:bg-neutral-200 rounded">Cancel</button>
-                    <button type="submit" class="px-4 py-2 font-bold text-white uppercase tracking-wider bg-green-600 hover:bg-green-700 rounded shadow">Confirm & Export</button>
+                    <button type="submit" class="px-4 py-2 font-bold text-white uppercase tracking-wider bg-green-600 hover:bg-green-700 rounded shadow">Confirm &amp; Export</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script>
-        const systemModal = document.getElementById('system-modal');
-        const renderCanvas = document.getElementById('invoice-render-canvas');
-        const dynamicRecordsBox = document.getElementById('dynamic-records-box');
-
-        document.getElementById('form-date').value = new Date().toISOString().split('T')[0];
-
-        function openSystemModal() { systemModal.classList.remove('hidden'); }
-        function closeSystemModal() { systemModal.classList.add('hidden'); }
-
-        function appendNewItemFormRow() {
-            const count = dynamicRecordsBox.getElementsByClassName('item-entry').length + 1;
-            const rowTemplate = `
-                <div class="item-entry bg-neutral-50 p-3 rounded border border-neutral-200 relative">
-                    <div class="flex justify-between items-center mb-1.5">
-                        <span class="font-bold text-blue-600 uppercase tracking-wide">Item Record #<span class="index-badge">${count}</span></span>
-                        <button type="button" onclick="this.closest('.item-entry').remove(); recalculateRowBadges();" class="text-red-500 hover:text-red-700 font-bold uppercase text-[10px]">Remove</button>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="col-span-2">
-                            <input type="text" placeholder="Description" required class="row-desc w-full border border-neutral-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium">
-                        </div>
-                        <div>
-                            <input type="number" placeholder="Amount (KD)" required class="row-amount w-full border border-neutral-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium font-mono">
-                        </div>
-                    </div>
-                </div>
-            `;
-            dynamicRecordsBox.insertAdjacentHTML('beforeend', rowTemplate);
-        }
-
-        function recalculateRowBadges() {
-            const items = dynamicRecordsBox.getElementsByClassName('item-entry');
-            Array.from(items).forEach((el, index) => {
-                el.querySelector('.index-badge').textContent = index + 1;
-            });
-        }
-
-        // FIXED NUMBER TO ENGLISH WORDS TRANSLATION ENGINE
-        function convertNumberToEnglishWords(amount) {
-            let num = Math.floor(amount);
-            if (num === 0) return "Zero KD";
-
-            const units = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", 
-                           "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
-            const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-
-            function convertUnderThousand(value) {
-                let text = "";
-                if (value >= 100) {
-                    text += units[Math.floor(value / 100)] + " Hundred ";
-                    value %= 100;
-                }
-                if (value >= 20) {
-                    text += tens[Math.floor(value / 10)] + " ";
-                    value %= 10;
-                }
-                if (value > 0) {
-                    text += units[value] + " ";
-                }
-                return text.trim();
-            }
-
-            let words = "";
-            if (num >= 1000000) {
-                words += convertUnderThousand(Math.floor(num / 1000000)) + " Million ";
-                num %= 1000000;
-            }
-            if (num >= 1000) {
-                words += convertUnderThousand(Math.floor(num / 1000)) + " Thousand ";
-                num %= 1000;
-            }
-            if (num > 0) {
-                words += convertUnderThousand(num);
-            }
-
-            return (words.trim() + " KD Only").replace(/\s+/g, ' ');
-        }
-
-        // Processing Pipeline
-        function executeInvoiceGenerationPipeline(event) {
-            event.preventDefault();
-
-            document.getElementById('target-no').textContent = document.getElementById('form-no').value;
-            document.getElementById('target-address').textContent = document.getElementById('form-address').value;
-            
-            const inputDate = new Date(document.getElementById('form-date').value);
-            const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-            document.getElementById('target-date').textContent = inputDate.toLocaleDateString('en-US', dateOptions);
-
-            const tbody = document.getElementById('target-table-body');
-            tbody.innerHTML = '';
-
-            const inputRows = dynamicRecordsBox.getElementsByClassName('item-entry');
-            let computedGrandTotal = 0;
-
-            Array.from(inputRows).forEach((row, i) => {
-                const descriptionStr = row.querySelector('.row-desc').value;
-                const valueNum = parseFloat(row.querySelector('.row-amount').value) || 0;
-                computedGrandTotal += valueNum;
-
-                const tr = document.createElement('tr');
-                tr.className = "text-center divide-x divide-black align-top font-medium";
-                tr.innerHTML = `
-                    <td class="py-3 px-2 font-mono">${i + 1}.</td>
-                    <td class="py-3 px-4 text-left whitespace-normal break-words max-w-md">${descriptionStr}</td>
-                    <td class="py-3 px-4 text-right font-mono">${valueNum}KD</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            document.getElementById('target-grand-total').textContent = `${computedGrandTotal}KD`;
-            document.getElementById('target-total-words').textContent = convertNumberToEnglishWords(computedGrandTotal);
-
-            const fileInput = document.getElementById('form-sig-file');
-            const imgElement = document.getElementById('target-salesman-sig-img');
-            
-            if (fileInput.files && fileInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imgElement.src = e.target.result;
-                    imgElement.classList.remove('hidden');
-                    finalizeAndExportPdf();
-                }
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                imgElement.classList.add('hidden');
-                imgElement.src = "";
-                finalizeAndExportPdf();
-            }
-        }
-
-        function finalizeAndExportPdf() {
-            renderCanvas.classList.remove('hidden');
-            closeSystemModal();
-
-            // Native explicit layout download trigger sequence
-            setTimeout(() => {
-                const invoiceElement = document.getElementById('invoice-render-canvas');
-                const outputName = `Invoice_No_${document.getElementById('target-no').textContent || 'Document'}.pdf`;
-                
-                const configurationSettings = {
-                    margin:       [0, 0, 0, 0],
-                    filename:     outputName,
-                    image:        { type: 'jpeg', quality: 1.0 },
-                    html2canvas:  { scale: 3, useCORS: true, logging: false, letterRendering: true },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
-                // Triggers immediate file download link interaction on safety stream
-                html2pdf().set(configurationSettings).from(invoiceElement).save();
-            }, 500);
-        }
-    </script>
+    <script src="invoice.js"></script>
 </body>
 </html>
