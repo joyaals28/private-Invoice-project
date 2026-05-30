@@ -11,7 +11,7 @@
 <body class="bg-zinc-800 min-h-screen p-6 flex flex-col items-center">
 
 <!-- ═══════════════════════════════
-     TOP BAR
+     TOP BAR CONTROL PANEL
 ════════════════════════════════ -->
 <div id="top-bar" class="w-full max-w-[210mm] flex justify-between items-center mb-6 bg-zinc-900 p-4 rounded-lg shadow-md">
     <div class="flex items-center gap-3">
@@ -38,113 +38,129 @@
 </div>
 
 <!-- ═══════════════════════════════
-     INVOICE SHEET
-     Everything uses <table> or
-     explicit pixel/percent layout —
-     NO flexbox, NO floats on the
-     invoice itself so html2canvas
-     captures it correctly.
+     EXACT INVOICE SHEET TEMPLATE
 ════════════════════════════════ -->
 <div id="invoice-render-canvas" class="invoice-sheet shadow-2xl hidden">
+    
+    <!-- MAIN INVOICE CONTAINER (Strict Page Bounds Flow) -->
+    <div class="invoice-container">
+        
+        <!-- TOP ZONE: Content Area -->
+        <div class="invoice-content-zone">
+            
+            <!-- BILINGUAL MAIN COMPANY HEADER TABLE (With Sandboxed Center Logo Slot) -->
+            <table class="header-table">
+                <tr>
+                    <!-- English Corporate Left Block -->
+                    <td class="header-side-cell text-left">
+                        <h1 class="company-title-en">Ture Gen. Trad. &amp; Cont. Co.</h1>
+                        <h2 class="sub-title-en">Chacko Al-Kuwaithya</h2>
+                        <h3 class="services-title-en">Sales &amp; Maintenance Contracting Company</h3>
+                        <p class="services-list-en">
+                            Sand Filter, Water Heater, Water Pump, Sewage Pump<br>
+                            Motor Rewinding, Plumbing &amp; Electrical Works<br>
+                            Lathe, Milling, Fabrication, Argon &amp; Welding
+                        </p>
+                    </td>
+                    
+                    <!-- Fixed-Dimension Centered Logo Sandbox Frame -->
+                    <td class="logo-sandbox-cell">
+                        <div class="logo-frame-wrapper">
+                            <img id="target-logo-img" src="" alt="Corporate Logo">
+                        </div>
+                    </td>
+                    
+                    <!-- Arabic Corporate Right Block -->
+                    <td class="header-side-cell text-right" dir="rtl">
+                        <h1 class="company-title-ar ar">شركة ترو للتجارة العامة والمقاولات</h1>
+                        <h2 class="sub-title-ar ar">شاكو الكويتية</h2>
+                        <h3 class="services-title-ar ar">الصيانة أجهزة معالجة المياه</h3>
+                        <p class="services-list-ar ar">
+                            فلتر رمال &#8212; سخان مياه &#8212; مضخة مياه &#8212; مضخة صرف صحي<br>
+                            لف المحركات &#8212; سباكة وأشغال كهربائية<br>
+                            مخرطة &#8212; تفريز &#8212; تصنيع &#8212; لحام أرجون وعادي
+                        </p>
+                    </td>
+                </tr>
+            </table>
 
-    <!-- HEADER — two-cell table, border-box, no gap tricks -->
-    <table style="width:100%; border-collapse:collapse; border-bottom:2px solid #111; padding-bottom:0; margin-bottom:8px; table-layout:fixed;">
-        <tr>
-            <!-- English: left 50% -->
-            <td style="width:50%; vertical-align:top; padding:0 8px 10px 0;">
-                <div style="font-family:'Poppins',sans-serif; font-weight:700; font-size:17px; color:#111827; line-height:1.2;">Ture Gen. Trad. &amp; Cont. Co.</div>
-                <div style="font-family:'Poppins',sans-serif; font-weight:700; font-size:12px; color:#1f2937; margin-top:3px;">Chacko Al-Kuwaithya</div>
-                <div style="font-family:'Poppins',sans-serif; font-weight:600; font-size:8.5px; color:#4b5563; text-transform:uppercase; letter-spacing:0.8px; margin-top:3px;">Sales &amp; Maintenance Contracting Company</div>
-                <div style="font-family:'Poppins',sans-serif; font-weight:400; font-size:8px; color:#6b7280; margin-top:6px; line-height:1.7;">
-                    Sand Filter, Water Heater, Water Pump, Sewage Pump<br>
-                    Motor Rewinding, Plumbing &amp; Electrical Works<br>
-                    Lathe, Milling, Fabrication, Argon &amp; Welding
-                </div>
-            </td>
-            <!-- Arabic: right 50% -->
-            <td style="width:50%; vertical-align:top; padding:0 0 10px 8px; text-align:right; direction:rtl;">
-                <div class="ar" style="font-size:22px; font-weight:700; color:#111827; line-height:1.3;">شركة ترو للتجارة العامة والمقاولات</div>
-                <div class="ar" style="font-size:14px; font-weight:700; color:#1f2937; margin-top:3px;">شاكو الكويتية</div>
-                <div class="ar" style="font-size:10px; font-weight:400; color:#4b5563; margin-top:3px;">الصيانة أجهزة معالجة المياه</div>
-                <div class="ar" style="font-size:8.5px; font-weight:400; color:#6b7280; margin-top:6px; line-height:1.8;">
-                    فلتر رمال &#8212; سخان مياه &#8212; مضخة مياه &#8212; مضخة صرف صحي<br>
-                    لف المحركات &#8212; سباكة وأشغال كهربائية<br>
-                    مخرطة &#8212; تفريز &#8212; تصنيع &#8212; لحام أرجون وعادي
-                </div>
-            </td>
-        </tr>
-    </table>
+            <!-- INVOICE TYPE STRIP BANNER -->
+            <div class="badge-wrapper">
+                <span class="invoice-type-badge">
+                    CASH / CREDIT INVOICE
+                </span>
+            </div>
 
-    <!-- BADGE -->
-    <div style="text-align:center; margin:8px 0 10px;">
-        <span style="display:inline-block; border:2px solid #111827; padding:4px 28px; font-family:'Poppins',sans-serif; font-weight:700; font-size:10.5px; letter-spacing:2px; text-transform:uppercase; background:#f3f4f6; color:#111827;">
-            CASH &nbsp;/&nbsp; CREDIT &nbsp; INVOICE
-        </span>
+            <!-- METADATA INFORMATION BLOCK -->
+            <table class="meta-data-table">
+                <tr>
+                    <td class="text-left">
+                        <div class="meta-line"><span class="font-bold">No :</span>&nbsp;<span id="target-no" class="font-semibold"></span></div>
+                        <div class="meta-line"><span class="font-bold">Address :</span>&nbsp;<span id="target-address" class="font-semibold"></span></div>
+                    </td>
+                    <td class="text-right" style="vertical-align: top;">
+                        <div class="meta-line"><span class="font-bold">Date :</span>&nbsp;<span id="target-date" class="font-semibold"></span></div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- PRIMARY LINE ITEM DATA TABLE -->
+            <table class="items-data-table">
+                <thead>
+                    <tr>
+                        <th class="col-sl-no">SL No.</th>
+                        <th class="col-description">Description</th>
+                        <th class="col-total-amount">Total Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="target-table-body">
+                    <!-- Dynamic layout rows parse here natively -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2" class="total-words-cell">
+                            TOTAL:&nbsp;<span id="target-total-words"></span>
+                        </td>
+                        <td id="target-grand-total" class="total-amount-cell"></td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+        </div>
+
+        <!-- BOTTOM ZONE: Pinned To Base Elements -->
+        <div class="invoice-footer-zone">
+            
+            <!-- AUTHORIZATION STAMPS SIGNATURE ROW -->
+            <table class="signatures-table">
+                <tr>
+                    <td class="sig-column">
+                        <div class="sig-placeholder-space"></div>
+                        <div class="sig-underline-label">Receiver Sign</div>
+                    </td>
+                    <td class="sig-column">
+                        <div class="sig-placeholder-space">
+                            <img id="target-salesman-sig-img" src="" alt="Salesman Signature">
+                        </div>
+                        <div class="sig-underline-label">Salesman Sign</div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- BILINGUAL COMPLIANCE REGISTERED OFFICE ADDRESS LINE -->
+            <div class="compliance-footer-banner">
+                <p class="footer-ar ar" dir="rtl">الشويخ الصناعية &#8722; مجمع أملاك الدولة &#8722; المبنى ١٠٣/١٠٦ &#8722; الدور الأرضي &#8722; محل رقم ٤٦ &#8722; تلفون : ٩٧٩٥٦٩٣٢ &#8722; ٥١٧٧٢٧٩١ &#8722; ٦٥٧٥٦١٥٦</p>
+                <p class="footer-en">Shuwaikh Industrial - Amlak Al-Dawliya Comp. Bldg. 103/106 - Ground Floor - Shop No. 46 - Tel. 97956932 - 51772791 - 65756156</p>
+            </div>
+            
+        </div>
+        
     </div>
 
-    <!-- META ROW -->
-    <table style="width:100%; border-collapse:collapse; margin-bottom:10px; font-family:'Poppins',sans-serif; font-size:11px; color:#111827;">
-        <tr>
-            <td style="vertical-align:top; padding:0;">
-                <div style="margin-bottom:4px;"><span style="font-weight:700;">No :</span>&nbsp;<span id="target-no" style="font-weight:600;"></span></div>
-                <div><span style="font-weight:700;">Address :</span>&nbsp;<span id="target-address" style="font-weight:600;"></span></div>
-            </td>
-            <td style="vertical-align:top; text-align:right; padding:0;">
-                <div><span style="font-weight:700;">Date :</span>&nbsp;<span id="target-date" style="font-weight:600;"></span></div>
-            </td>
-        </tr>
-    </table>
-
-    <!-- LINE ITEMS TABLE -->
-    <table style="width:100%; border-collapse:collapse; border:1.5px solid #111827; font-family:'Poppins',sans-serif; font-size:10.5px; color:#111827;">
-        <thead>
-            <tr style="background:#f3f4f6; border-bottom:1.5px solid #111827;">
-                <th style="border-right:1px solid #111827; padding:8px 4px; width:48px; text-align:center; font-weight:700; font-size:9.5px; letter-spacing:0.5px; text-transform:uppercase;">SL No.</th>
-                <th style="border-right:1px solid #111827; padding:8px 10px; text-align:left; font-weight:700; font-size:9.5px; letter-spacing:0.5px; text-transform:uppercase;">Description</th>
-                <th style="padding:8px 10px; width:120px; text-align:right; font-weight:700; font-size:9.5px; letter-spacing:0.5px; text-transform:uppercase;">Total Amount</th>
-            </tr>
-        </thead>
-        <tbody id="target-table-body"></tbody>
-        <tfoot>
-            <tr style="border-top:1.5px solid #111827; background:#f3f4f6;">
-                <td colspan="2" style="border-right:1px solid #111827; padding:8px 10px; font-family:'Poppins',sans-serif; font-weight:700; font-size:10px;">
-                    TOTAL:&nbsp;<span id="target-total-words" style="font-weight:500; font-style:italic; color:#374151;"></span>
-                </td>
-                <td id="target-grand-total" style="padding:8px 10px; text-align:right; font-family:'Poppins',sans-serif; font-weight:700; font-size:10.5px;"></td>
-            </tr>
-        </tfoot>
-    </table>
-
-    <!-- SIGNATURES — positioned with spacer row -->
-    <table style="width:100%; border-collapse:collapse; margin-top:28mm;">
-        <tr>
-            <td style="width:50%; text-align:center; vertical-align:bottom; padding:0 20px;">
-                <div style="height:44px;"></div>
-                <div style="width:140px; border-top:1.5px solid #111827; margin:0 auto; padding-top:5px; font-family:'Poppins',sans-serif; font-weight:700; font-size:10px; color:#1f2937; text-align:center;">Receiver Sign</div>
-            </td>
-            <td style="width:50%; text-align:center; vertical-align:bottom; padding:0 20px;">
-                <div style="height:44px; display:flex; align-items:center; justify-content:center;">
-                    <img id="target-salesman-sig-img" src="" style="max-height:44px; max-width:140px; object-fit:contain; display:none;" alt="Signature">
-                </div>
-                <div style="width:140px; border-top:1.5px solid #111827; margin:0 auto; padding-top:5px; font-family:'Poppins',sans-serif; font-weight:700; font-size:10px; color:#1f2937; text-align:center;">Salesman Sign</div>
-            </td>
-        </tr>
-    </table>
-
-    <!-- FOOTER -->
-    <div style="border-top:1.5px solid #111827; margin-top:10px; padding-top:6px; text-align:center;">
-        <div class="ar" style="font-size:10.5px; font-weight:700; color:#374151; line-height:1.7; text-align:center; direction:rtl; unicode-bidi:embed;">
-            الشويخ الصناعية &#8722; مجمع أملاك الدولة &#8722; المبنى ١٠٣/١٠٦ &#8722; الدور الأرضي &#8722; محل رقم ٤٦ &#8722; تلفون : ٩٧٩٥٦٩٣٢ &#8722; ٥١٧٧٢٧٩١ &#8722; ٦٥٧٥٦١٥٦
-        </div>
-        <div style="font-family:'Poppins',sans-serif; font-size:8.5px; font-weight:600; color:#374151; margin-top:3px;">
-            Shuwaikh Industrial - Amlak Al-Dawliya Comp. Bldg. 103/106 - Ground Floor - Shop No. 46 - Tel. 97956932 - 51772791 - 65756156
-        </div>
-    </div>
-
-</div><!-- /invoice-render-canvas -->
+</div>
 
 <!-- ═══════════════════════════════
-     MODAL
+     SPECIFICATION POPUP CONFIGURATION FORM
 ════════════════════════════════ -->
 <div id="system-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden p-4 z-50">
     <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 border border-gray-200">
@@ -167,6 +183,18 @@
                 <label class="block font-bold text-gray-600 uppercase mb-1">Address:</label>
                 <input type="text" id="form-address" required class="w-full border border-gray-300 rounded p-2 focus:outline-none focus:border-blue-500 font-medium">
             </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-bold text-gray-600 uppercase mb-1">Corporate Logo (Optional Image):</label>
+                    <input type="file" id="form-logo-file" accept="image/*" class="w-full text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-zinc-100 file:text-zinc-700 hover:file:bg-zinc-200 file:cursor-pointer">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-600 uppercase mb-1">Salesman Signature (Optional PNG):</label>
+                    <input type="file" id="form-sig-file" accept="image/*" class="w-full text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-zinc-100 file:text-zinc-700 hover:file:bg-zinc-200 file:cursor-pointer">
+                </div>
+            </div>
+            
             <hr class="border-gray-200">
             <div id="dynamic-records-box" class="space-y-3">
                 <div class="item-entry bg-gray-50 p-3 rounded border border-gray-200">
@@ -184,13 +212,8 @@
                 </div>
             </div>
             <button type="button" onclick="appendNewItemFormRow()" class="text-blue-600 hover:text-blue-800 font-bold uppercase text-[10px] tracking-wide">
-                + Add Line Item
+                + Add 2nd Description / Line Item
             </button>
-            <hr class="border-gray-200">
-            <div>
-                <label class="block font-bold text-gray-600 uppercase mb-1">Salesman Signature (Optional PNG/JPG):</label>
-                <input type="file" id="form-sig-file" accept="image/*" class="w-full text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-[11px] file:font-semibold file:bg-blue-50 file:text-blue-700 file:cursor-pointer hover:file:bg-blue-100">
-            </div>
             <div class="flex justify-end gap-2 pt-4 border-t border-gray-100">
                 <button type="button" onclick="closeSystemModal()" class="px-4 py-2 font-bold text-gray-500 uppercase tracking-wider bg-gray-100 hover:bg-gray-200 rounded">Cancel</button>
                 <button type="submit" class="px-4 py-2 font-bold text-white uppercase tracking-wider bg-green-600 hover:bg-green-700 rounded shadow">Confirm &amp; Export</button>
